@@ -1,0 +1,4 @@
+media/**/*.mkv
+media/**/*.webm
+*.swp
+*.bak

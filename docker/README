@@ -1,0 +1,5 @@
+Build:
+  docker build -t vmaf .
+
+Run:
+  docker run -it --gpus all --rm vmaf /bin/bash

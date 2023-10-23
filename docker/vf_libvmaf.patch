@@ -1,0 +1,13 @@
+--- ./libavfilter/vf_libvmaf.c	2023-10-22 13:11:37.000000000 -0700
++++ ./libavfilter/vf_libvmaf.c	2023-10-22 18:07:32.795677629 -0700
+@@ -704,10 +704,6 @@
+     if (err < 0)
+         return err;
+ 
+-    err = parse_deprecated_options(ctx);
+-    if (err)
+-        return err;
+-
+     err = parse_models(ctx);
+     if (err)
+         return err;
