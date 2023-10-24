@@ -34,8 +34,8 @@ fi
 	-map 0:v -map 1:v \
 	-threads 12 \
 	-filter_complex \
-	  "[0:v]fps=fps=$dist_fps,scale=$reference_res:flags=bicubic,setpts=PTS-STARTPTS[refrence];
-[1:v]fps=fps=$ref_fps,setpts=PTS-STARTPTS[distorted],
-[refrence][distorted]libvmaf=model='path=/usr/local/share/model/vmaf_v0.6.1neg.json':n_subsample=$subsample:n_threads=12:log_fmt=json:log_path=/dev/stdout:pool=harmonic_mean" -f null - | 
+	  "[0:v]fps=fps=$dist_fps,scale=$reference_res:flags=bicubic,setpts=PTS-STARTPTS[dist];
+[1:v]fps=fps=$ref_fps,setpts=PTS-STARTPTS[ref],
+[dist][ref]libvmaf=model='path=/usr/local/share/model/vmaf_v0.6.1neg.json':n_subsample=$subsample:n_threads=12:log_fmt=json:log_path=/dev/stdout:pool=harmonic_mean" -f null - | 
   jq '.pooled_metrics.vmaf.harmonic_mean'
 

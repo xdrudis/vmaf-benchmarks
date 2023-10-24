@@ -19,16 +19,23 @@ function ffprobeStream {
 reference="$1"
 width=$(ffprobeStream 'width' "$reference")
 height=$(ffprobeStream 'height' "$reference")
+ref_fps=$(ffprobeStream r_frame_rate "$reference")
 
 distorted="$2"
+dist_fps=$(ffprobeStream r_frame_rate "$distorted")
+
+if [ $ref_fps != $dist_fps ] ; then
+	ref_fps=$(ffprobeStream avg_frame_rate "$reference")
+	dist_fps=$(ffprobeStream avg_frame_rate "$distorted")
+fi
 
 /usr/bin/time -f "%e %U %S" ffmpeg -hide_banner -v error -nostats \
 	-init_hw_device cuda:0,primary_ctx=1 \
 	-i "$distorted" -i "$reference" \
-	-threads 12 \
 	-map 0:v -map 1:v \
+	-threads 12 \
 	-filter_complex \
-	  "[0:v]format=yuv420p,hwupload_cuda,scale_cuda=w=$width:h=$height:interp_algo=bicubic,setpts=PTS-STARTPTS[dist],
-[1:v]format=yuv420p,hwupload_cuda,setpts=PTS-STARTPTS[ref],
-[ref][dist]libvmaf_cuda=model='path=/usr/local/share/model/vmaf_v0.6.1neg.json':n_subsample=$subsample:log_fmt=json:log_path=/dev/stdout:pool=harmonic_mean" \
+	  "[0:v]fps=fps=$dist_fps,format=yuv420p,hwupload_cuda,scale_cuda=w=$width:h=$height:interp_algo=bicubic,setpts=PTS-STARTPTS[dist],
+[1:v]fps=fps=$ref_fps,format=yuv420p,hwupload_cuda,setpts=PTS-STARTPTS[ref],
+[dist][ref]libvmaf_cuda=model='path=/usr/local/share/model/vmaf_v0.6.1neg.json':n_subsample=$subsample:log_fmt=json:log_path=/dev/stdout:pool=harmonic_mean" \
 	-f null - | jq '.pooled_metrics.vmaf.harmonic_mean'

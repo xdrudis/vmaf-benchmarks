@@ -14,9 +14,10 @@ RUN apt-get -qq update && \
       libdav1d-dev \
       pkg-config \
       make \
-      nasm \   
+      nasm \
       xxd \
       curl \
+      cuda-compat-12-1 \
       python3 python3-dev python3-distutils \
       yasm && \
    rm -fR /var/lib/apt/lists/*
@@ -41,6 +42,7 @@ RUN mkdir -p /var/tmp/nv-codec-headers && \
     make install && \
     rm -fR /var/tmp/nv-codec-headers
 
+ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:/usr/local/cuda-12.1/compat
 COPY vf_libvmaf.patch /var/tmp/vf_libvmaf.patch
 # 6e4030a latest commit as of Oct'23
 RUN mkdir -p /var/tmp/ffmpeg && \
@@ -51,7 +53,7 @@ RUN mkdir -p /var/tmp/ffmpeg && \
         --enable-cuda --enable-cuda-nvcc --enable-cuvid --enable-nonfree \
         --disable-doc --disable-ffplay --disable-network \
         --extra-ldflags="-L/usr/local/cuda/lib64" && \
-   make -j$(nproc) && \
+   make -j$(nproc) || (cat ffbuild/config.log; exit 1) && \
    make install && \
    rm -fR /var/tmp/ffmpeg
 
