@@ -43,12 +43,10 @@ RUN mkdir -p /var/tmp/nv-codec-headers && \
     rm -fR /var/tmp/nv-codec-headers
 
 ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:/usr/local/cuda-12.1/compat
-COPY vf_libvmaf.patch /var/tmp/vf_libvmaf.patch
-# 6e4030a latest commit as of Oct'23
+# latest commit as of Oct'23
 RUN mkdir -p /var/tmp/ffmpeg && \
-   curl -sL https://github.com/FFmpeg/FFmpeg/archive/6e4030a.tar.gz | tar xz -C /var/tmp/ffmpeg --strip-components=1 && \
+   curl -sL https://github.com/FFmpeg/FFmpeg/archive/1ad7bd0.tar.gz | tar xz -C /var/tmp/ffmpeg --strip-components=1 && \
    cd /var/tmp/ffmpeg && \
-   patch -p1 < /var/tmp/vf_libvmaf.patch && \
    ./configure --enable-libvmaf --enable-version3 --enable-shared --enable-libdav1d \
         --enable-cuda --enable-cuda-nvcc --enable-cuvid --enable-nonfree \
         --disable-doc --disable-ffplay --disable-network \
